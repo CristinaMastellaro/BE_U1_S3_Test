@@ -2,9 +2,16 @@ package cristinamastellaro;
 
 import cristinamastellaro.dao.ElementoBibliotecaDAO;
 import cristinamastellaro.dao.PrestitoDAO;
+import cristinamastellaro.entities.Genere;
+import cristinamastellaro.entities.Libro;
+import cristinamastellaro.entities.Periodicita;
+import cristinamastellaro.entities.Rivista;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
+
+import java.util.InputMismatchException;
+import java.util.Scanner;
 
 public class Application {
 
@@ -12,6 +19,8 @@ public class Application {
 
     public static void main(String[] args) {
         EntityManager em = emf.createEntityManager();
+
+        Scanner s = new Scanner(System.in);
 
 //        Libro libro1 = new Libro("Circe", 2018, 400, "Madeline Miller", Genere.NARRATIVA);
 //        Libro libro2 = new Libro("La canzone di Achille", 2012, 300, "Madeline Miller", Genere.NARRATIVA);
@@ -83,7 +92,177 @@ public class Application {
 //        pDao.findByUserCard("2495ea75-d7bc-4973-b30d-4b8393190ae1");
 //        pDao.findByUserCard("5a61b27f-6529-41ac-9486-96480a4904d2");
 
-        pDao.findOverduesNotReturned();
+//        pDao.findOverduesNotReturned();
+
+        while (true) {
+            try {
+                System.out.println("\nCiao! Benvenuto nel catalogo della biblioteca Leonardo da Vinci! Che operazione vuoi compiere? Per uscire digita 'quit'");
+                System.out.println("1 - Aggiungi un elemento al catalogo");
+                System.out.println("2 - Ricerca usando il codice ISBN");
+                System.out.println("3 - Ricerca usando l'anno di pubblicazione");
+                System.out.println("4 - Ricerca per autore");
+                System.out.println("5 - Ricerca per titolo o parte di esso");
+                System.out.println("6 - Ricerca i prestiti attualmente in prestito di un utente");
+                System.out.println("7 - Ricerca tutti i prestiti scaduti e non ancora restituiti");
+                System.out.println("8 - Rimuovi un elemento");
+                String operation = s.nextLine();
+                if (operation.trim().equals("quit")) break;
+
+                switch (operation) {
+                    case "1":
+                        while (true) {
+                            try {
+                                System.out.println("Che elemento vuoi aggiungere? ");
+                                System.out.println("1 - Libro");
+                                System.out.println("2 - Rivista");
+                                String tipoEl = s.nextLine();
+                                if (!tipoEl.trim().equals("1") && !tipoEl.trim().equals("2")) {
+                                    System.out.println("Numero selezionato non valido, ridigita");
+                                }
+
+                                System.out.println("Indica il titolo:");
+                                String title = s.nextLine();
+                                System.out.println("Indica l'anno di pubblicazione:");
+                                String year = s.nextLine();
+                                int yearN = Integer.parseInt(year);
+                                System.out.println("Indica il numero di pagine:");
+                                String pages = s.nextLine();
+                                int pagesN = Integer.parseInt(pages);
+                                System.out.println("Il codice ISBN sarà aggiunto in automatico in base alle informazioni inserite");
+
+                                switch (tipoEl) {
+                                    case "1":
+                                        System.out.println("Indica il nome dell'autore:");
+                                        String author = s.nextLine();
+                                        System.out.println("Indica il genere, scegliendo il numero corrispondente:");
+                                        System.out.println("1 - Narrativa");
+                                        System.out.println("2 - Poesia");
+                                        System.out.println("3 - Horror");
+                                        System.out.println("4 - Fantasy");
+                                        System.out.println("5 - Saggistica");
+                                        System.out.println("(Se il numero selezionato non è valido, verrà messo in automatico genere narrativo)");
+                                        String choice = s.nextLine();
+                                        Genere genre = switch (choice) {
+                                            case "2" -> Genere.POESIA;
+                                            case "3" -> Genere.HORROR;
+                                            case "4" -> Genere.FANTASY;
+                                            case "5" -> Genere.SAGGISTICA;
+                                            default -> Genere.NARRATIVA;
+                                        };
+                                        Libro libro = new Libro(title, yearN, pagesN, author, genre);
+                                        ebDao.save(libro);
+                                        break;
+                                    case "2":
+                                        System.out.println("Indica la periodicità, scegliendo il numero corrispondente:");
+                                        System.out.println("1 - Settimanale");
+                                        System.out.println("2 - Mensile");
+                                        System.out.println("3 - Semestrale");
+                                        System.out.println("(Se il numero selezionato non è valido, verrà messo in automatico periodicità mensile)");
+                                        String per = s.nextLine();
+                                        Periodicita periodicity = switch (per) {
+                                            case "1" -> Periodicita.SETTIMANALE;
+                                            case "3" -> Periodicita.SEMESTRALE;
+                                            default -> Periodicita.MENSILE;
+                                        };
+                                        Rivista rivista = new Rivista(title, Integer.parseInt(year), Integer.parseInt(pages), periodicity);
+                                        ebDao.save(rivista);
+                                        break;
+                                    default:
+                                        System.out.println("Come ci sei arrivato fin qui?");
+                                }
+                                break;
+                            } catch (Exception e) {
+                                System.err.println(e.getMessage());
+                                System.out.println("Ricomincia a compilare i dati");
+                            }
+                        }
+                        break;
+                    case "2":
+                        while (true) {
+                            try {
+                                System.out.println("Indica il codice ISBN dell'elemento da cercare:");
+                                String isbn = s.nextLine();
+                                ebDao.findByISBN(Integer.parseInt(isbn));
+                                break;
+                            } catch (Exception e) {
+                                System.err.println(e.getMessage());
+                            }
+                        }
+                        break;
+                    case "3":
+                        while (true) {
+                            try {
+                                System.out.println("Indica l'anno di pubblicazione:");
+                                String year = s.nextLine();
+                                ebDao.findByYear(Integer.parseInt(year));
+                                break;
+                            } catch (Exception e) {
+                                System.err.println(e.getMessage());
+                            }
+                        }
+                        break;
+                    case "4":
+                        while (true) {
+                            try {
+                                System.out.println("Indica l'autore di cui vuoi cercare i libri:");
+                                String author = s.nextLine();
+                                ebDao.findByAuthor(author);
+                                break;
+                            } catch (Exception e) {
+                                System.err.println(e.getMessage());
+                            }
+                        }
+                        break;
+                    case "5":
+                        while (true) {
+                            try {
+                                System.out.println("Indica il libro scrivendo il suo titolo o parte di esso:");
+                                String title = s.nextLine();
+                                ebDao.findByTitle(title);
+                                break;
+                            } catch (Exception e) {
+                                System.err.println(e.getMessage());
+                            }
+                        }
+                        break;
+                    case "6":
+                        while (true) {
+                            try {
+                                System.out.println("Indica il numero della tessera di cui vuoi vedere i prestiti in attivo:");
+                                String title = s.nextLine();
+                                pDao.findByUserCard(title);
+                                break;
+                            } catch (Exception e) {
+                                System.err.println(e.getMessage());
+                            }
+                        }
+                        break;
+                    case "7":
+                        pDao.findOverduesNotReturned();
+                        break;
+                    case "8":
+                        while (true) {
+                            try {
+                                System.out.println("Indica il codice isbn dell'elemento da rimuovere:");
+                                String isbn = s.nextLine();
+                                ebDao.removeElement(Integer.parseInt(isbn));
+                                break;
+                            } catch (InputMismatchException e) {
+                                System.err.println("Non puoi inserire stringhe al posto di numeri!");
+                            } catch (Exception e) {
+                                System.err.println(e.getMessage());
+                            }
+                        }
+                        break;
+                    default:
+                        System.out.println("Valore selezionato non valido, riprova");
+                        break;
+                }
+
+            } catch (Exception e) {
+                System.err.println(e.getMessage());
+            }
+        }
 
     }
 }
