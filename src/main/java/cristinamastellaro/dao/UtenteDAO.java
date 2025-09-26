@@ -51,7 +51,7 @@ public class UtenteDAO {
             ElementoBiblioteca elTrovato = eDao.findByISBN(id);
             if (elTrovato == null) throw new Exception("L'operazione verrà terminata");
 
-            TypedQuery<Utente> query = em.createQuery("SELECT u FROM Utente u JOIN Prestito p ON p.utente.numeroTessera = u.numeroTessera JOIN ElementoBiblioteca eb ON eb.codiceIsbn = p.elementoPrestato.codiceIsbn WHERE p.elementoPrestato.codiceIsbn = :id ORDER BY p.inizioPrestito ASC", Utente.class);
+            TypedQuery<Utente> query = em.createQuery("SELECT u FROM Utente u JOIN Prestito p ON p.utente.numeroTessera = u.numeroTessera JOIN ElementoBiblioteca eb ON eb.codiceIsbn = p.elementoPrestato.codiceIsbn WHERE p.elementoPrestato.codiceIsbn = :id ORDER BY p.inizioPrestito DESC", Utente.class);
             query.setParameter("id", id);
             List<Utente> found = query.getResultList();
             if (found.isEmpty()) {
@@ -59,7 +59,7 @@ public class UtenteDAO {
                 return null;
             } else {
 //                TypedQuery<Prestito> query2 = em.createQuery("")
-                System.out.println("Ecco gli utenti che hanno prenotato il libro, con scritto anche la data in cui l'hanno preso in prestito");
+                System.out.println("Ecco gli utenti che hanno prenotato il libro, in ordine decrescente e con indicato il periodo di prestito");
 //                found.forEach(System.out::println);
                 PrestitoDAO pDao = new PrestitoDAO(em);
                 found.forEach(u -> {
