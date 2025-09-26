@@ -42,7 +42,7 @@ public class ElementoBibliotecaDAO {
         try {
             ElementoBiblioteca elToRemove = findByISBN(isbn);
             if (elToRemove == null)
-                throw new Exception("Dato che non abbiamo trovato l'elemento, l'operazione è stata interrotta");
+                throw new Exception("L'operazione verrà interrotta");
 
             EntityTransaction et = em.getTransaction();
             et.begin();

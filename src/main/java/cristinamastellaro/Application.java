@@ -2,15 +2,13 @@ package cristinamastellaro;
 
 import cristinamastellaro.dao.ElementoBibliotecaDAO;
 import cristinamastellaro.dao.PrestitoDAO;
-import cristinamastellaro.entities.Genere;
-import cristinamastellaro.entities.Libro;
-import cristinamastellaro.entities.Periodicita;
-import cristinamastellaro.entities.Rivista;
+import cristinamastellaro.dao.UtenteDAO;
+import cristinamastellaro.entities.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
-import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Scanner;
 
 public class Application {
@@ -51,7 +49,7 @@ public class Application {
 //        Utente utente3 = new Utente("Roberto", "Bolle", LocalDate.of(1997, 5, 7));
 //        Utente utente4 = new Utente("Carmela", "Dionisi", LocalDate.of(2001, 10, 15));
 //
-//        UtenteDAO uDao = new UtenteDAO(em);
+        UtenteDAO uDao = new UtenteDAO(em);
 //        uDao.save(utente1);
 //        uDao.save(utente2);
 //        uDao.save(utente3);
@@ -88,9 +86,9 @@ public class Application {
 //        ebDao.findByTitle("Ci");
 //        ebDao.findByTitle("Ramettino");
 
-//        pDao.findByUserCard("2495ea75-d7bc-4973-b30d-4b8393190ae0");
-//        pDao.findByUserCard("2495ea75-d7bc-4973-b30d-4b8393190ae1");
-//        pDao.findByUserCard("5a61b27f-6529-41ac-9486-96480a4904d2");
+//        pDao.findByUserCardTheActiveLoad("2495ea75-d7bc-4973-b30d-4b8393190ae0");
+//        pDao.findByUserCardTheActiveLoad("2495ea75-d7bc-4973-b30d-4b8393190ae1");
+//        pDao.findByUserCardTheActiveLoad("5a61b27f-6529-41ac-9486-96480a4904d2");
 
 //        pDao.findOverduesNotReturned();
 
@@ -104,7 +102,9 @@ public class Application {
                 System.out.println("5 - Ricerca per titolo o parte di esso");
                 System.out.println("6 - Ricerca i prestiti attualmente in prestito di un utente");
                 System.out.println("7 - Ricerca tutti i prestiti scaduti e non ancora restituiti");
-                System.out.println("8 - Rimuovi un elemento");
+                System.out.println("8 - Ricerca lo storico di un elemento");
+                System.out.println("9 - Ricerca lo storico di un utente");
+                System.out.println("10 - Rimuovi un elemento");
                 String operation = s.nextLine();
                 if (operation.trim().equals("quit")) break;
 
@@ -230,7 +230,7 @@ public class Application {
                             try {
                                 System.out.println("Indica il numero della tessera di cui vuoi vedere i prestiti in attivo:");
                                 String title = s.nextLine();
-                                pDao.findByUserCard(title);
+                                pDao.findByUserCardTheActiveLoad(title);
                                 break;
                             } catch (Exception e) {
                                 System.err.println(e.getMessage());
@@ -243,12 +243,37 @@ public class Application {
                     case "8":
                         while (true) {
                             try {
+                                System.out.println("Indica il codice isbn dell'elemento di cui vuoi vedere lo storico:");
+                                String isbn = s.nextLine();
+                                uDao.findAllUsersThatBookedAnElement(Integer.parseInt(isbn));
+                                break;
+                            } catch (Exception e) {
+                                System.err.println(e.getMessage());
+                            }
+                        }
+                        break;
+                    case "9":
+                        while (true) {
+                            try {
+                                System.out.println("Indica il codice dell'utente di cui si vuole vedere lo storico:");
+                                String id = s.nextLine();
+                                List<Prestito> found = pDao.findByUserCard(id);
+                                ;
+                                System.out.println("Ecco lo storico dei prestiti dell'utente:");
+                                found.forEach(System.out::println);
+                                break;
+                            } catch (Exception e) {
+                                System.err.println(e.getMessage());
+                            }
+                        }
+                        break;
+                    case "10":
+                        while (true) {
+                            try {
                                 System.out.println("Indica il codice isbn dell'elemento da rimuovere:");
                                 String isbn = s.nextLine();
                                 ebDao.removeElement(Integer.parseInt(isbn));
                                 break;
-                            } catch (InputMismatchException e) {
-                                System.err.println("Non puoi inserire stringhe al posto di numeri!");
                             } catch (Exception e) {
                                 System.err.println(e.getMessage());
                             }

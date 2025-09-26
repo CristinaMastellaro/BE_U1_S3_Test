@@ -37,6 +37,29 @@ public class PrestitoDAO {
             if (utente == null) throw new Exception("");
 
             UUID idUUID = UUID.fromString(id);
+            TypedQuery<Prestito> query = em.createQuery("SELECT p FROM Prestito p JOIN ElementoBiblioteca eb ON eb.codiceIsbn = p.elementoPrestato.codiceIsbn WHERE p.utente.numeroTessera = :tessera", Prestito.class);
+            query.setParameter("tessera", idUUID);
+            List<Prestito> found = query.getResultList();
+            if (found.isEmpty()) {
+                System.out.println("L'utente non ha mai richiesto prestiti");
+                return null;
+            } else {
+                return found;
+            }
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return null;
+        }
+    }
+
+    public List<Prestito> findByUserCardTheActiveLoad(String id) {
+        try {
+            // Assicuriamoci che la card sia intestato a un utente
+            UtenteDAO uDao = new UtenteDAO(em);
+            Utente utente = uDao.findByUserCard(id);
+            if (utente == null) throw new Exception("");
+
+            UUID idUUID = UUID.fromString(id);
             TypedQuery<Prestito> query = em.createQuery("SELECT p FROM Prestito p JOIN ElementoBiblioteca eb ON eb.codiceIsbn = p.elementoPrestato.codiceIsbn WHERE p.utente.numeroTessera = :tessera AND p.restituzioneEffettiva IS NULL", Prestito.class);
             query.setParameter("tessera", idUUID);
             List<Prestito> found = query.getResultList();
